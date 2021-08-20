@@ -5,7 +5,7 @@
     <meta name="viewport"
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
+    <title>Hello World School - Color Picker</title>
     <link rel="stylesheet" href="style.css">
     <script type='text/javascript' src='https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js'></script>
 </head>
@@ -61,7 +61,9 @@
 </main>
 <div class="picker">
     <script>
-        setTimeout("LoadJquery()", 50)
+        setTimeout("LoadJquery()", 50);
+        let hexes = ['00', '03', '05', '08', '0A', '0D', '0F', '12', '14', '17', '1A', '1C', '1F', '21', '24', '26', '29', '2B', '2E', '30', '33', '36', '38', '3B', '3D', '40', '42', '45', '47', '4A', '4D', '4F', '52', '54', '57', '59', '5C', '5E', '61', '63', '66', '69', '6B', '6E', '70', '73', '75', '78', '7A', '7D', '80', '82', '85', '87', '8A', '8C', '8F', '91', '94', '96', '99', '9C', '9E', 'A1', 'A3', 'A6', 'A8', 'AB', 'AD', 'B0', 'B3', 'B5', 'B8', 'BA', 'BD', 'BF', 'C2', 'C4', 'C7', 'C9', 'CC', 'CF', 'D1', 'D4', 'D6', 'D9', 'DB', 'DE', 'E0', 'E3', 'E6', 'E8', 'EB', 'ED', 'F0', 'F2', 'F5', 'F7', 'FA', 'FC', 'FF']
+        let transparency = 100;
 
         function LoadJquery() {
             $(".clipboard").on("click", function () {
@@ -117,6 +119,7 @@
                         a.y = d.originalEvent.changedTouches[0].pageY
                     }
                     a.y = a.y - $("#colorPicker-colors").offset().top - 1;
+
                     if (a.y <= -1) {
                         a.y = -1
                     }
@@ -124,23 +127,51 @@
                         a.y = 199
                     }
                     $("#colorPicker-huePicker").css("top", a.y).show();
-                    let c = Math.round((200 - a.y - 1) * 2.4);
+                    let c = Math.round((200-a.y)/200*360)
                     if (c < 0) {
                         c = 0
                     }
                     if (c > 360) {
                         c = 360
                     }
+
+                    console.log(a, c)
+
                     colorHSB.h = c;
                     setColor(colorHSB, true)
                 }
+
+                function moveHueT(d) {
+                    let a = {y: d.pageY};
+                    if (d.originalEvent.changedTouches) {
+                        a.y = d.originalEvent.changedTouches[0].pageY
+                    }
+                    a.y = a.y - $(".picker-area-transparency").offset().top - 1;
+                    if (a.y <= 0) {
+                        a.y = 0
+                    }
+                    if (a.y >= 199) {
+                        a.y = 199
+                    }
+                    $("#colorPicker-t").css("top", a.y).show();
+
+                    transparency = Math.round(100 - Math.round(a.y) / 2);
+                    if (transparency === 100) {
+                        $('.write-rgb').text('RGB')
+                    } else {
+                        $('.write-rgb').text('RGBA')
+                    }
+                    setColor(colorHSB, true)
+                }
+
 
                 let setColor = function (a, j, c) {
                     let i = hsb2hex(a);
                     let e = hsb2rgb(a);
                     let f = rgb2cmyk(e.r, e.g, e.b);
                     let d = rgb2hsv(e.r, e.g, e.b);
-                    $("#colorbg").css("backgroundColor", "#" + i);
+                    $("#colorbg").css("backgroundColor", `rgb(${e.r}, ${e.g}, ${e.b}, ${transparency / 100})`);
+                    $(".picker-area-transparency").css("background", `linear-gradient(#${i}, transparent)`);
                     switch (c) {
                         case"HEX":
                             // $("#colorR").val(e.r);
@@ -184,8 +215,10 @@
                         // $("#colorV").val(Math.round(d.v));
                         // break;
                         default:
-                            $("#colorhex").val("#" + i.toLowerCase());
-                            $("#colorRGB").val(`(${e.r}, ${e.g}, ${e.b})`);
+                            $("#colorhex").val(`#${i.toLowerCase()}${transparency !== 100 ? hexes[transparency].toLowerCase() : ''}`);
+                            $("#colorRGB").val(`(${e.r}, ${e.g}, ${e.b}${
+                                transparency !== 100 ? `, ${transparency / 100}` : ''
+                            })`);
                             // $("#colorR").val(e.r);
                             // $("#colorG").val(e.g);
                             // $("#colorB").val(e.b);
@@ -298,6 +331,14 @@
                     })
                 };
                 let moveColorByHex = function (f, e) {
+                    if (f.length > 7) {
+                        let tr_hex = (f[f.length - 2] + f[f.length - 1]).toUpperCase()
+                        transparency = hexes.indexOf(tr_hex)
+                        let dt = (100 - transparency) * 2
+
+                        $("#colorPicker-t").css("top", dt).show();
+                        f = f.slice(0, -2)
+                    }
                     let c = hex2hsb(f);
                     let a = Math.round((c.s) / 0.5025) - 5;
                     let i = Math.round((100 - c.b) / 0.5025) - 5;
@@ -569,6 +610,12 @@
                             moving = "hues";
                             moveHue(a)
                         }
+                        if ($(a.target).parents().andSelf().hasClass("hues-t")) {
+                            a.preventDefault();
+                            mousebutton = 1;
+                            moving = "hues-t";
+                            moveHueT(a)
+                        }
                     }).bind("mouseup touchend", function (a) {
                         a.preventDefault();
                         mousebutton = 0;
@@ -581,6 +628,9 @@
                             }
                             if (moving === "hues") {
                                 moveHue(a)
+                            }
+                            if (moving === "hues-t") {
+                                moveHueT(a)
                             }
                         }
                     });
@@ -602,6 +652,9 @@
         LoadJquery();
         let form_content = `
             <div class="picker-example" id="colorbg"></div>
+            <div class="picker-area-transparency hues-t">
+                <div id="colorPicker-t" class="picker-hues-btn"></div>
+            </div>
             <div id="colorPicker-colors" class="picker-area colors">
                 <div id="colorPicker-c" class="picker-cursor"></div>
             </div>
@@ -611,12 +664,12 @@
             <div class="picker-container">
                 <div class="picker-color-block">
                     <span>HEX</span>
-                    <input type="text" class="picker-color-input" maxlength="7" id="colorhex" />
+                    <input type="text" class="picker-color-input" maxlength="9" id="colorhex"/>
                     <img class="clipboard" src="./img/clipboard.png" alt="">
                 </div>
                 <div class="picker-color-block">
-                    <span>RGB</span>
-                    <input type="text" class="picker-color-input" id="colorRGB" maxlength="3" />
+                    <span class="write-rgb">RGB</span>
+                    <input type="text" class="picker-color-input" id="colorRGB" maxlength="20"/>
                     <img class="clipboard" src="./img/clipboard.png" alt="">
                 </div>
                 <!--<div class="picker-color-block">

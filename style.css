@@ -89,7 +89,7 @@ footer {
 }
 
 .picker-buttons {
-    background-color: #2D6AB4;
+    background-color: #b4952d;
     width: 100%;
     height: 22px;
     text-align: center;
@@ -120,15 +120,29 @@ footer {
     background: url("./img/circle.gif") center no-repeat;
 }
 
-.picker-hues {
+.picker-area-transparency {
     position: absolute;
     top: 75px;
     left: 250px;
     width: 20px;
     height: 200px;
+    background: linear-gradient(#7f9db9, transparent);
+    cursor: crosshair;
+}
+
+
+
+.picker-hues {
+    position: absolute;
+    top: 75px;
+    left: 300px;
+    width: 20px;
+    height: 200px;
     background: url(./img/rainbow.png) center no-repeat;
     cursor: crosshair;
 }
+
+
 
 .picker-hues-btn {
     position: relative;
@@ -151,7 +165,7 @@ footer {
 }
 
 .picker-color-input {
-    padding: 7px;
+    padding: 10px;
     border: 1px solid #7f9db9;
     border-radius: 5px;
     margin: 5px 0;
@@ -166,9 +180,9 @@ footer {
 
 .picker .clipboard {
     position: absolute;
-    width: 20px;
-    margin-left: -22px;
-    margin-top: 10px;
+    width: 23px;
+    margin-left: -26px;
+    margin-top: 12px;
     opacity: 0.6;
     cursor: pointer;
     filter: hue-rotate(190deg) saturate(500%);
